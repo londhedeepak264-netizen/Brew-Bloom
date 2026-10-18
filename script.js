@@ -1,52 +1,11 @@
-/* ---------------------------------
-   BREW & BEAN - JAVASCRIPT
----------------------------------- */
-
-const menuToggle = document.querySelector(".menu-toggle");
-const navLinks = document.querySelector(".nav-links");
-const navigationItems = document.querySelectorAll(".nav-links a");
-
-// Open and close the mobile navigation
-function closeMenu() {
-  navLinks.classList.remove("is-open");
-  menuToggle.setAttribute("aria-expanded", "false");
-  menuToggle.setAttribute("aria-label", "Open navigation menu");
-}
-
-menuToggle.addEventListener("click", () => {
-  const isExpanded =
-    menuToggle.getAttribute("aria-expanded") === "true";
-
-  menuToggle.setAttribute("aria-expanded", String(!isExpanded));
-  menuToggle.setAttribute(
-    "aria-label",
-    isExpanded ? "Open navigation menu" : "Close navigation menu"
-  );
-
-  navLinks.classList.toggle("is-open", !isExpanded);
-});
-
-// Close the menu when a navigation link is selected
-navigationItems.forEach((link) => {
-  link.addEventListener("click", closeMenu);
-});
-
-// Close the menu when the visitor presses Escape
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeMenu();
-    menuToggle.focus();
-  }
-});
-
-// Close the mobile menu when returning to desktop layout
-window.addEventListener("resize", () => {
-  if (window.innerWidth > 760) {
-    closeMenu();
-  }
-});
-
-// Set the current copyright year automatically
-const currentYear = document.getElementById("current-year");
-
-currentYear.textContent = new Date().getFullYear();
+const products=[{id:1,name:'Morning Ritual',desc:'Smooth · Chocolatey · Comforting',price:549,category:'beans',tag:'BESTSELLER',image:'https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&w=700&q=85'},{id:2,name:'Golden Hour',desc:'Caramel · Nutty · Balanced',price:599,category:'ground',tag:'FAN FAVORITE',image:'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=700&q=85'},{id:3,name:'Midnight Muse',desc:'Bold · Dark · Intense',price:649,category:'beans',tag:'BOLD & BEAUTIFUL',image:'https://images.unsplash.com/photo-1611854779393-1b2da9d400fe?auto=format&fit=crop&w=700&q=85'},{id:4,name:'Chill & Sip',desc:'Refreshing · Silky · Sweet',price:399,category:'cold',tag:'COLD BREW',image:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=700&q=85'}];
+const cart=new Map();const $=s=>document.querySelector(s);const money=n=>'₹'+n.toLocaleString('en-IN');let toastTimer;
+function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+function renderProducts(filter='all'){const list=products.filter(p=>filter==='all'||p.category===filter);$('#products').innerHTML=list.map(p=>`<article class="product"><div class="product-image"><img src="${p.image}" alt="${p.name} coffee" loading="lazy"><span class="product-tag">${p.tag}</span><button class="add" data-id="${p.id}" aria-label="Add ${p.name} to bag">+</button></div><div class="product-info"><div><h3>${p.name}</h3><p>${p.desc}</p></div><span class="product-price">${money(p.price)}</span></div></article>`).join('')}
+function renderCart(){const count=[...cart.values()].reduce((s,n)=>s+n,0),total=[...cart].reduce((s,[id,n])=>s+products.find(p=>p.id===id).price*n,0);$('#cartCount').textContent=count;$('#drawerCount').textContent=`(${count})`;$('#cartTotal').textContent=money(total);$('#cartItems').innerHTML?null:null;$('#cartItems').innerHTML=count?[...cart].map(([id,n])=>{const p=products.find(x=>x.id===id);return `<div class="cart-item"><img src="${p.image}" alt=""><div class="cart-item-info"><h3>${p.name}</h3><p>${money(p.price)}</p><div class="qty"><button data-id="${id}" data-change="-1" aria-label="Remove one ${p.name}">−</button><span>${n}</span><button data-id="${id}" data-change="1" aria-label="Add one ${p.name}">+</button></div></div><strong>${money(p.price*n)}</strong></div>`}).join(''):'<p>Your bag is empty. A little coffee would look good here ☕</p>'}
+function openCart(){renderCart();$('#cartOverlay').hidden=false;$('#cartDrawer').classList.add('open');$('#cartDrawer').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';$('#closeCart').focus()}
+function closeCart(){$('#cartDrawer').classList.remove('open');$('#cartDrawer').setAttribute('aria-hidden','true');$('#cartOverlay').hidden=true;document.body.style.overflow='';$('#cartButton').focus()}
+renderProducts();renderCart();document.addEventListener('click',e=>{const add=e.target.closest('.add');if(add){const id=Number(add.dataset.id);cart.set(id,(cart.get(id)||0)+1);renderCart();toast('Added to your bag ☕')}const change=e.target.closest('[data-change]');if(change){const id=Number(change.dataset.id),n=(cart.get(id)||0)+Number(change.dataset.change);if(n<=0)cart.delete(id);else cart.set(id,n);renderCart()}});
+document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false')});btn.classList.add('active');btn.setAttribute('aria-pressed','true');renderProducts(btn.dataset.filter)}));$('#cartButton').addEventListener('click',openCart);$('#closeCart').addEventListener('click',closeCart);$('#cartOverlay').addEventListener('click',closeCart);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#cartDrawer').classList.contains('open'))closeCart()});$('#checkout').addEventListener('click',()=>{$('#checkoutMessage').textContent=cart.size?'Demo storefront: checkout/payment integration is not connected yet.':'Add a coffee to your bag first.'});
+$('#menuButton').addEventListener('click',()=>{const open=$('#nav').classList.toggle('open');$('#menuButton').setAttribute('aria-expanded',String(open))});document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{$('#nav').classList.remove('open');$('#menuButton').setAttribute('aria-expanded','false')}));
+const reviews=[['“It’s become the best part of my morning routine. The coffee is incredible, and the packaging is just beautiful.”','— Aanya S., happy coffee person'],['“Finally, coffee that tastes as lovely as it looks. Golden Hour has completely won me over.”','— Rohan M., weekend brewer'],['“Fresh, balanced, and full of character. Every cup feels like a little treat.”','— Meera P., coffee enthusiast']];let review=0;function renderReview(){$('#reviewQuote').textContent=reviews[review][0];$('#reviewAuthor').textContent=reviews[review][1];$('#reviewIndex').textContent=`0${review+1} / 0${reviews.length}`}$('#prevReview').addEventListener('click',()=>{review=(review+reviews.length-1)%reviews.length;renderReview()});$('#nextReview').addEventListener('click',()=>{review=(review+1)%reviews.length;renderReview()});$('#newsletterForm').addEventListener('submit',e=>{e.preventDefault();$('#formMessage').textContent='Thanks for joining! This is a demo form; no email was sent or stored.';$('#newsletterForm').reset()});$('#year').textContent=new Date().getFullYear();
